@@ -31,6 +31,7 @@ existing_jarlist="${basedir}/existing-jarlist-sync-[$grouipId]-[$artifactId]-[$v
 uploaded_jarlist="${basedir}/uploaded-jarlist-sync-[$grouipId]-[$artifactId]-[$version].txt"
 tmp_pomlist="${basedir}/pomlist-sync-[$grouipId]-[$artifactId]-[$version].txt"
 
+base_info(){
 cat << EOF
 ** Maven repo-sync **
 --------------------------------------------------------------------------------
@@ -44,6 +45,9 @@ To Repo: $TARGET_REPO_URL
 Local tmp repo: $local_tmp_repo
 --------------------------------------------------------------------------------
 EOF
+}
+
+base_info
 
 if [[ -d "${local_tmp_repo}" ]] ; then
 	rm -r  "${local_tmp_repo}" || die "Failed to delete existing dir: $local_tmp_repo" ;
@@ -104,25 +108,17 @@ jar_sync(){
 	if [[ "${target_version}" = "" ]]  && [[ "${target_parent_version}" != "" ]]   ; then 
 		target_version="${target_parent_version}"
 	fi
-	local jar_repo_path="${grouipId//./\/}/${artifactId}/${version}/${artifactId}-${version}.jar"
+	local jar_repo_path="${target_groupId//./\/}/${target_artifactId}/${target_version}/${target_artifactId}-${target_version}.jar"
 
-	echo "Checking MD5 and SHA1 in remote and local"
+	echo "Checking SHA1 in remote and local"
 
-	local relative_jar_path="${jar_file#$local_tmp_repo/}"
-	local md5_url="${TARGET_REPO_URL}/${jar_repo_path}.md5"
+	local relative_jar_path="${jar_file#|$local_tmp_repo/|}"
 	local sha1_url="${TARGET_REPO_URL}/${jar_repo_path}.sha1"
-	local md5_local_file="${jar_file}.md5"
 	local sha1_local_file="${jar_file}.sha1"
-	local remote_md5=$( curl -k -s "${md5_url}" )
 	local remote_sha1=$( curl -k -s "${sha1_url}" )
-	local local_md5=$(	 cat "${md5_local_file}" )
 	local local_sha1=$(  cat "${sha1_local_file}" )
 	local present_in_target="no"
 
-####if [ -n "${local_md5}" ]  ; then  
-####	present_in_target=$( [ "${local_md5}" = "${remote_md5}" ] && echo "yes")
-####else 
-####fi
 	if [ -n "${local_sha1}" ]  ; then  
 		if  [ "${local_sha1}" = "${remote_sha1}" ] ; then
 			present_in_target="yes"
@@ -130,8 +126,10 @@ jar_sync(){
 	fi
 
 	if [ "${present_in_target}" = "yes" ] ; then
-		echo "${jar_file}" >> "${existing_jarlist}"
-		echo "Already present in target: ${jar_file}" 
+		echo "${remote_sha1} ${relative_jar_path}" >> "${existing_jarlist}"
+		echo "Already present in target: ${TARGET_REPO_URL}/${jar_repo_path}" 
+		echo "Unlisting pom: ${pom_file}"
+		grep -v -F "${pom_file}" "${tmp_pomlist}" > "${tmp_pomlist}"
 	else
 		echo "Deploying "
 		echo "Jar: ${jar_file}"
@@ -153,12 +151,13 @@ jar_sync(){
 		if [ $? -eq 0   ] ; then 
 			echo "Unlisting pom: ${pom_file}"
 			grep -v -F "${pom_file}" "${tmp_pomlist}" > "${tmp_pomlist}"
-			echo "${jar_file}" >> "${uploaded_jarlist}"
+			echo "${local_sha1} ${relative_jar_path}" >> "${uploaded_jarlist}"
 		else
 			echo "Jar upload failed: ${jar_file}"
-			echo "${jar_file}" >> "${fail_jarlist}"
+			echo "${local_sha1} ${relative_jar_path}" >> "${fail_jarlist}"
 		fi
 	fi
+	echo "--------------------------------------------------------------------------------"
 }
 
 
@@ -172,15 +171,31 @@ done
 echo "********************************************************************************"
 echo "Summary"
 echo "********************************************************************************"
-echo "Uploaded"
+
+if [ -e "${existing_jarlist}" ] ; then 
+	echo "--------------------------------------------------------------------------------"
+	echo "Existing artifacts: $( wc -l ${existing_jarlist} )"
+	echo "--------------------------------------------------------------------------------"
+	cat "${existing_jarlist}"
+fi
+
+if [ -e "${uploaded_jarlist}" ] ; then 
+	echo "--------------------------------------------------------------------------------"
+	echo "Uploaded artifacts: $( wc -l ${uploaded_jarlist} )"
+	echo "--------------------------------------------------------------------------------"
+	cat "${uploaded_jarlist}"
+fi
+if [ -e "${fail_jarlist}" ] ; then 
+	echo "--------------------------------------------------------------------------------"
+	echo "Failed artifacts: $( wc -l ${fail_jarlist} )"
+	echo "--------------------------------------------------------------------------------"
+	cat "${fail_jarlist}"
+fi
+if [ -e "${tmp_pomlist}" ] ; then 
+	echo "--------------------------------------------------------------------------------"
+	echo "Pending POMs: $( wc -l ${tmp_pomlist} )"
+	echo "--------------------------------------------------------------------------------"
+	cat "${tmp_pomlist}"
+fi
 echo "--------------------------------------------------------------------------------"
-cat "${uploaded_jarlist}"
-echo "--------------------------------------------------------------------------------"
-echo "Failed"
-echo "--------------------------------------------------------------------------------"
-cat "${fail_jarlist}"
-echo "--------------------------------------------------------------------------------"
-echo "Pending POMs"
-echo "--------------------------------------------------------------------------------"
-cat "${tmp_pomlist}"
-echo "--------------------------------------------------------------------------------"
+base_info
