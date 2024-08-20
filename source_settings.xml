@@ -12,7 +12,7 @@
 	<mirror>
 		<id>source-repo</id>
 		<mirrorOf>*</mirrorOf>
-		<url>https://localhost/repository/source-repo</url>
+		<url>http://10.0.1.16:8081/repository/maven-central</url>
 	</mirror>
 </mirrors>
 <profiles>
@@ -24,7 +24,7 @@
 		<repositories>
 			<repository>
 				<id>source-repo</id>
-				<url>https://localhost/repository/source-repo</url>
+				<url>http://10.0.1.16:8081/repository/maven-central</url>
 			</repository>
 		</repositories>
 	</profile>

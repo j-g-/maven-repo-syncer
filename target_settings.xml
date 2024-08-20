@@ -3,8 +3,8 @@
 <servers>
 	<server>
 		<id>target-repo</id>
-		<username></username>
-		<password></password>
+		<username>test-target-user</username>
+		<password>Test123</password>
 	</server>
 </servers>
 <profiles>
@@ -15,7 +15,7 @@
 		<repositories>
 			<repository>
 				<id>target-repo</id>
-				<url>https://localhost/repository/copy-repo</url>
+				<url>http://10.0.1.16:8081/repository/test-target/</url>
 			</repository>
 		</repositories>
 	</profile>
