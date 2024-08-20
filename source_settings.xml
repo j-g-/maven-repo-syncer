@@ -1,0 +1,32 @@
+
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
+<servers>
+	<server>
+		<id>source-repo</id>
+		<username></username>
+		<password></password>
+	</server>
+</servers>
+<mirrors>
+	<mirror>
+		<id>source-repo</id>
+		<mirrorOf>*</mirrorOf>
+		<url>https://localhost/repository/source-repo</url>
+	</mirror>
+</mirrors>
+<profiles>
+	<profile>
+		<activation>
+
+			<activeByDefault>true</activeByDefault>
+		</activation>
+		<repositories>
+			<repository>
+				<id>source-repo</id>
+				<url>https://localhost/repository/source-repo</url>
+			</repository>
+		</repositories>
+	</profile>
+</profiles>
+</settings>
