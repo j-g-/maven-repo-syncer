@@ -14,5 +14,6 @@ jobs:
         echo "Testing, var is: ${{ TEST_VAR }}"
 
     - name: Test Step2
+      run: |
         echo "Testing2, var is: ${{ TEST_VAR }}"
 
