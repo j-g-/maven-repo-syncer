@@ -11,9 +11,9 @@ jobs:
     steps:
     - name: Test Step1
       run: |
-        echo "Testing, var is: ${{ TEST_VAR }}"
+        echo "Testing, var is: ${{ inputs.TEST_VAR }}"
 
     - name: Test Step2
       run: |
-        echo "Testing2, var is: ${{ TEST_VAR }}"
+        echo "Testing2, var is: ${{ inputs.TEST_VAR }}"
 
