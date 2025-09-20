@@ -1,0 +1,18 @@
+name: Test Workflow
+on:
+  workflow_dispatch:
+    inputs:
+      TEST_VAR:
+        required: true
+        type: string
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Test Step1
+      run: |
+        echo "Testing, var is: ${{ TEST_VAR }}"
+
+    - name: Test Step2
+        echo "Testing2, var is: ${{ TEST_VAR }}"
+
